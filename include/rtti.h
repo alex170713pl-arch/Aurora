@@ -1,6 +1,6 @@
-#ifndef CUTILS_RTTI_H
-#define CUTILS_RTTI_H
-#include "cutils-type.h"
+#ifndef AURORA_RTTI_H
+#define AURORA_RTTI_H
+#include "type.h"
 #include <stddef.h>
 
 typedef struct rtti rtti_t;

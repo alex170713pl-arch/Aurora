@@ -1,7 +1,7 @@
 #include "cutils-rtti.h"
 #include <stdio.h>
 typedef struct {
-    int x;
+    int x ;
     int y;
 } point;
 int main() {
