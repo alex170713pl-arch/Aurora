@@ -1,6 +1,4 @@
-# cutils
-pack of headers for C programming
-
+# Aurora : light of ANSI C
 ## modules
 - rtti
 - smartptr (one_owner and shared_ptr)

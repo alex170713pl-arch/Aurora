@@ -1,4 +1,4 @@
-#include "../include/cutils-str.h"
+#include "../include/str.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>

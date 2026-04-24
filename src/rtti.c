@@ -1,4 +1,4 @@
-#include "../include/cutils-rtti.h"
+#include "../include/rtti.h"
 #include <stdlib.h>
 #include <string.h>
 
