@@ -11,7 +11,6 @@ struct handle {
     size_t runs_limit;
     signal_t* registered;
 };
-
 struct signal_group {
     signal_t** signals;
     size_t len;
