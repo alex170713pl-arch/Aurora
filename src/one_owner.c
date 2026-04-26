@@ -1,9 +1,9 @@
-#include <stdint.h>
+
 #include <stdlib.h>
 #include "../include/one_owner.h"
 struct one_owner{
     void* ptr;
-    uintptr_t start;
+    void* start;
     size_t alloced;
 };
 one_ownerptr* one_owner_create(size_t size) {
@@ -14,7 +14,7 @@ one_ownerptr* one_owner_create(size_t size) {
         free(new);
         return NULL;
     }
-    new->start = (uintptr_t)new->ptr;
+    new->start = new->ptr;
     new->alloced = size;
     return new;
 }
@@ -35,7 +35,7 @@ void* one_owner_get(one_ownerptr* p) {
 }
 int one_owner_isvalid(one_ownerptr* p) {
     if (!p ) return 0;
-    if ((uintptr_t)p->ptr != p->start) return 0;
+    if (p->ptr != p->start) return 0;
     return 1;
 }
 void one_owner_realloc(one_ownerptr* ptr, size_t new_size) {
@@ -45,7 +45,7 @@ void one_owner_realloc(one_ownerptr* ptr, size_t new_size) {
     if (!new_ptr) return;
     
     ptr->ptr = new_ptr;
-    ptr->start = (uintptr_t)new_ptr; 
+    ptr->start = new_ptr; 
     ptr->alloced = new_size;
 }
 void one_owner_free(one_ownerptr** p) {
