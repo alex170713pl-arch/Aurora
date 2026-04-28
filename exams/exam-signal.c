@@ -1,4 +1,4 @@
-#include <Aurora/signal.h>
+#include "../include/signal.h"
 #include <stdio.h>
 void on_click(void** args,void* r) { // create handler
     *(int*)r = (*(int*)args[0]) + (*(int*)args[1]);
@@ -24,8 +24,8 @@ int main() {
 
     signal_connect(s,h);
     signal_connect(s,h2); // connect handlers
-
-    for (int i = 0; i <= 25; i++) {
+    int i;
+    for ( i = 0; i <= 25; i++) {
         d[0] = &f;
         signal_emit(s,"click",d,&ret); // emit messages
         d[0] = st;

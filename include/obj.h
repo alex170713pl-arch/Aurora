@@ -4,6 +4,7 @@
     typedef struct obj obj_t;
     typedef struct obj_interf obj_interface_t;
     #include <stddef.h>
+    #include "type.h"
     typedef enum {
         ACCESS_PUBLIC,
         ACCESS_PRIVATE,
