@@ -6,8 +6,8 @@ struct one_owner{
     void* start;
     size_t alloced;
 };
-one_ownerptr* one_owner_create(size_t size) {
-    one_ownerptr* new = malloc(sizeof(struct one_owner));
+one_ownerptr_t* one_owner_create(size_t size) {
+    one_ownerptr_t* new = malloc(sizeof(struct one_owner));
     if (!new) return NULL;
     new->ptr = malloc(size);
     if (!new->ptr) {
@@ -18,10 +18,10 @@ one_ownerptr* one_owner_create(size_t size) {
     new->alloced = size;
     return new;
 }
-one_ownerptr* one_owner_move(one_ownerptr* __dest__) {
+one_ownerptr_t* one_owner_move(one_ownerptr_t* __dest__) {
     if (!one_owner_isvalid(__dest__)) return NULL;
     if (!__dest__ || !__dest__->ptr) return NULL;
-    one_ownerptr* new = malloc(sizeof(struct one_owner));
+    one_ownerptr_t* new = malloc(sizeof(struct one_owner));
     if (!new) return NULL;
     new->ptr = __dest__->ptr;
     new->alloced = __dest__->alloced;
@@ -29,16 +29,16 @@ one_ownerptr* one_owner_move(one_ownerptr* __dest__) {
     __dest__->ptr = NULL;
     return new;
 }
-void* one_owner_get(one_ownerptr* p) {
+void* one_owner_get(one_ownerptr_t* p) {
     if (!one_owner_isvalid(p)) return NULL;
     return p->ptr;
 }
-int one_owner_isvalid(one_ownerptr* p) {
+int one_owner_isvalid(one_ownerptr_t* p) {
     if (!p ) return 0;
     if (p->ptr != p->start) return 0;
     return 1;
 }
-void one_owner_realloc(one_ownerptr* ptr, size_t new_size) {
+void one_owner_realloc(one_ownerptr_t* ptr, size_t new_size) {
     if (!one_owner_isvalid(ptr)) return;
     
     void* new_ptr = realloc(ptr->ptr, new_size);
@@ -48,7 +48,7 @@ void one_owner_realloc(one_ownerptr* ptr, size_t new_size) {
     ptr->start = new_ptr; 
     ptr->alloced = new_size;
 }
-void one_owner_free(one_ownerptr** p) {
+void one_owner_free(one_ownerptr_t** p) {
     if (!one_owner_isvalid(*p)) return;
     (*p)->alloced = 0;
     free((*p)->ptr);
