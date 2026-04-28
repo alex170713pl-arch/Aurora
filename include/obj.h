@@ -38,4 +38,10 @@
     int obj_find_field(obj_t* o,const char* field_name);
     int obj_find_method(obj_t* o,const char* method_name);
     int obj_is(obj_t* o,obj_class_t* class_to_check);
+
+    /*===== INTERFACES API =====*/
+    obj_interface_t * obj_interface_new(void);
+    int obj_interface_add_method(obj_interface_t * inter,const char* method_name);
+    void obj_interface_free(obj_interface_t** inter);
+    
 #endif
