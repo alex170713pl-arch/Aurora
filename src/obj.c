@@ -2,145 +2,70 @@
 #include "../include/obj.h"
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 typedef struct {
     obj_class_t ** classes;
     size_t cap;
     size_t len;
 } __global_list;
 static __global_list list;
-static void free_char_list(__char_list *lst) {
-    size_t i;
-    for ( i= 0; i < lst->len; i++)
-        free(lst->chars[i]);
-    free(lst->chars);
-    lst->chars = NULL;
-    lst->len = lst->cap = 0;
-}
-static void free_access_list(__access_list *lst) {
-    free(lst->levels);
-    lst->levels = NULL;
-    lst->len = lst->cap = 0;
-}
-static void free_objects_of_class(obj_class_t *c) {
-    size_t j;
-    for ( j = 0; j < c->object_len; j++) {
-        obj_t *o = c->objects[j];
-        if (c->_destructor)
-            c->_destructor(o);
-        size_t k;
-        for ( k = 0; k < o->field_len; k++)
-            rtti_free(&o->fields[k]);
-        free(o->fields);
-        free(o);
+typedef struct {
+    char dum;
+} __secret;
+typedef struct {
+    void** in;
+    size_t cap;
+    size_t len;
+} __container_t;
+void __container_push(__container_t * c,void* data,size_t datas) {
+    if (!c ) return;
+    if (!c->in) {
+        c->in = calloc(10,sizeof(void*));
+        if (!c->in) return;
+        c->cap = 10;
+        c->len = 0;
     }
-    free(c->objects);
-    c->objects = NULL;
-    c->object_len = c->object_cap = 0;
+    if (c->cap == c->len) {
+        size_t new_s = c->cap * 2;
+        void** newb = realloc(c->in,new_s * sizeof(void*));
+        if (!newb) return;
+        c->in = newb;
+        c->cap = new_s;
+    }
+    c->in[c->len] = calloc(1,datas);
+    if (!c->in[c->len]) return;
+    memcpy(c->in[c->len],data,datas); 
 }
-static void free_interfaces(obj_class_t *c) {
-    free_char_list(&c->ext_interfaces_name);
-    free_char_list(&c->need_to_realisate);
-}
-static void free_methods(obj_class_t *c) {
-    size_t i;
-    for ( i = 0; i < c->methods_len; i++)
-        free_char_list(c->methods_name);
-
-    free(c->methods);
-    c->methods = NULL;
-    c->methods_len = c->methods_cap = 0;
-
-    free_access_list(&c->methods_accesses);
-}
-static void free_fields(obj_class_t *c) {
-    free_char_list(&c->fields_name);
-    free_access_list(&c->fields_accesses);
-}
-static void free_vtable(obj_class_t *c) {
-    size_t i;
-    for (i = 0; i < c->vtable_len; i++)
-        free_char_list(c->vtable_mets_names);
-
-    free(c->vtable);
-    c->vtable = NULL;
-
-    free_char_list(&c->vtable_mets_names);
-    free_access_list(&c->vtable_accesses);
-
-    c->vtable_len = c->vtable_cap = 0;
-}
-static void free_class(obj_class_t *c) {
-    free_objects_of_class(c);
-    free_interfaces(c);
-    free_methods(c);
-    free_fields(c);
-    free_vtable(c);
-    free_char_list(&c->extend_names);
-    size_t i;
-    for (i = 0; i < c->extends_list_len; i++)
-        free_class(c->extends_list[i]);
-
-    free(c->extends_list);
-    free(c->name);
-    free(c);
-}
-
-void C_AND_E_SEQ() {
-    size_t i;
-    for (i = 0; i < list.len; i++)
-        free_class(list.classes[i]);
-    free(list.classes);
-    abort();
-}
-
-typedef struct {
-    char** chars;
-    size_t cap;
-    size_t len;
-} __char_list;
-typedef struct {
-    access_level * levels;
-    size_t cap;
-    size_t len;
-} __access_list;
+void C_AND_E_SEQ();
 struct obj_class {
     char * name;
     obj_constructor _constructor;
     obj_destructor _destructor;
     
-    __char_list extend_names;
-    struct obj_class** extends_list;
-    size_t extends_list_cap;
-    size_t extends_list_len;
+    __secret s;
 
-    obj_t** objects;
-    size_t object_cap;
-    size_t object_len;
+    __container_t extend_names;
+    __container_t extends_list;
 
-    __char_list ext_interfaces_name;
-    __char_list need_to_realisate;
-    __char_list methods_name;
-    obj_met* methods;
-    size_t methods_cap;
-    size_t methods_len;
-    __access_list methods_accesses;
+    __container_t objects;
 
-    __char_list fields_name;
-    __access_list fields_accesses;
+    __container_t ext_interfaces_name;
+    __container_t need_to_realisate;
 
-    obj_met* vtable;
-    __char_list vtable_mets_names;
-    size_t vtable_cap;
-    size_t vtable_len;
-    __access_list vtable_accesses;
+    __container_t methods_name;
+    __container_t methods;
+    __container_t methods_accesses;
+
+    __container_t     fields_name;
+    __container_t fields_accesses;
+
+    __container_t vtable;
+    __container_t vtable_mets_names;
+    __container_t    vtable_accesses;
 };
 struct obj {
     obj_class_t * parent;
-    rtti_t ** fields;
-    size_t field_cap;
-    size_t field_len;
+    __container_t c;
 };
 struct obj_interf {
-    __char_list names;
+    __container_t names;
 };

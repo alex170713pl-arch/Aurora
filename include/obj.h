@@ -1,4 +1,5 @@
 #ifndef AURORA_OBJ
+
     #define AURORA_OBJ
     typedef struct obj_class obj_class_t;
     typedef struct obj obj_t;
@@ -10,7 +11,7 @@
         ACCESS_PRIVATE,
         ACCESS_PROTECTED
     } access_level;
-    typedef void(*obj_met)(obj_t * self,void** args,void* data);
+    typedef void(*obj_met)(obj_t * self,void* sec,void** args,void* data);
     typedef void(*obj_constructor)(obj_t * self,void** args);
     typedef void(*obj_destructor)(obj_t* self);
     /*====== CLASS API =====*/
@@ -19,7 +20,7 @@
         obj_constructor __init__,
         obj_destructor __del__
     );
-    void obj_class_new_field(obj_class_t * class,int type,const char* name,access_level level,void* start_val,size_t val_size);
+    void obj_class_new_field(obj_class_t * class,int type,const char* name,access_level level);
     void obj_class_add_method(obj_class_t * class,obj_met method,const char* method_name,access_level level);
     int obj_class_extend(obj_class_t * who,obj_class_t * from);
     int obj_extend_interface(obj_class_t * who,obj_interface_t * from);
@@ -39,8 +40,10 @@
     int obj_find_field(obj_t* o,const char* field_name);
     int obj_find_method(obj_t* o,const char* method_name);
     int obj_is(obj_t* o,obj_class_t* class_to_check);
-
+    void * obj_get_private(obj_t* o,void* sec,const char* field_name);
+    
     /*===== INTERFACES API =====*/
+    
     obj_interface_t * obj_interface_new(void);
     int obj_interface_add_method(obj_interface_t * inter,const char* method_name);
     void obj_interface_free(obj_interface_t** inter);
