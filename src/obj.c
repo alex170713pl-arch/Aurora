@@ -150,26 +150,6 @@ void __container_free(__container_t* c) {
     }
     free(c->in);
 }
-void __container_unique(__container_t** targ) {
-    __container_t* new = NULL;
-    size_t i;
-    for (i = 0; i < (*targ)->len;i++) {
-        if (__container_find(new,(*targ)->in[i],(*targ)->elem_sizes[i]) == -1) {
-            __container_push(&new,(*targ)->in[i],(*targ)->elem_sizes[i]);
-        }
-    }
-    *targ = new;
-}
-void __container_unique_str(__container_t** targ) {
-    __container_t* new = NULL;
-    size_t i;
-    for (i = 0; i < (*targ)->len;i++) {
-        if (__container_find_str(new,(*targ)->in[i]) == -1) {
-            __container_push(&new,(*targ)->in[i],(*targ)->elem_sizes[i]);
-        }
-    }
-    *targ = new;
-}
 void UNWIND_ALL(void);
 struct obj_class {
     char * name;
@@ -269,6 +249,7 @@ void obj_class_new_field(obj_class_t * class,int type,const char* name,access_le
         push_err("[Aurora-obj] : ERROR: Type ID Invalid!",0);
         return;
     }
+    rtti_free(&__Temp);
     if (level > 3) {
         push_err("[Aurora-obj] : ERROR : Access Level Invalid!",0);
         return;
@@ -285,7 +266,7 @@ void obj_class_add_method(obj_class_t * class,obj_met method,const char* method_
         push_err("[Aurora-obj] : ERROR :Invalid name!",0);
         return;
     }
-    if (method && class->is_abstr) {
+    if ( class->is_abstr) {
         char to_print[9064];
         sprintf(to_print,"[Aurora-obj] : ERROR : Abstract Class %s can't have a realisation of method %s",class->name,method_name);
         push_err(to_print,0);
@@ -296,7 +277,7 @@ void obj_class_add_method(obj_class_t * class,obj_met method,const char* method_
         push_err(to_print,0);
         return;
     }
-    if (level > 3) {
+    if (level > ACCESS_PROTECTED || level < ACCESS_PUBLIC) {
         push_err("[Aurora-obj] : ERROR : Access Level Invalid!",0);
         return;
     }
@@ -341,13 +322,13 @@ int obj_class_extend(obj_class_t * who,obj_class_t * from) {
                 from->methods_name->elem_sizes[i]
             );
             __container_push(&who->extend_mets_access,
-                from->fields_accesses->in[i],
-                from->fields_accesses->elem_sizes[i]
+                from->methods_accesses->in[i],
+                from->methods_accesses->elem_sizes[i]
             );
         }
     }
     for (i = 0 ; i < from->vtable->len;i++) {
-        if (*(access_level*)from->vtable_accesses->in[i] != 0) {
+        if (*(access_level*)from->vtable_accesses->in[i] != ACCESS_PRIVATE) {
             __container_push(&who->extend_vtable,
                 from->vtable->in[i],
                 from->vtable->elem_sizes[i]
@@ -362,4 +343,68 @@ int obj_class_extend(obj_class_t * who,obj_class_t * from) {
             );
         }
     }
+    who->extend = 1;
+    return 0;
 }
+int obj_extend_interface(obj_class_t * who,obj_interface_t * from) {
+    if (!who) {
+        push_err("[Aurora-obj] : ERROR : Invalid class (who) !\n",0);
+        return -1;
+    }
+    if (!from) {
+        push_err("[Aurora-obj] : ERROR : Invalid Interface (from) !\n",0);
+        return -1;
+    }
+    if (__container_find(who->ext_interfaces,from,sizeof(obj_interface_t)) != -1) {
+        push_err("[Aurora-obj] : ERROR : Interface already exist!",0);
+        return -1;
+    }
+    __container_push(&who->ext_interfaces,from,sizeof(obj_interface_t));
+    return 0;
+}
+void obj_class_virtual(obj_class_t * who,obj_met method,const char* method_name,access_level level) {
+    if (!who) {
+        push_err("[Aurora-obj] : ERROR : Invalid class (who) !\n",0);
+        return ;
+    }
+    if (!method) {
+        push_err("[Aurora-obj] : ERROR : Invalid method!",0);
+        return;
+    }
+    if (!method_name) {
+        push_err("[Aurora-obj] : ERROR : Invalid name!",0);
+        return ;
+    }
+    if (__container_find_str(who->methods_name,method_name) != -1) {
+        push_err("[Aurora-obj] : ERROR : Virtual Method already exist!",0);
+        return;
+    }
+    if (level > ACCESS_PROTECTED || level < ACCESS_PUBLIC) {
+        push_err("[Aurora-obj] : ERROR : Access Level Invalid!",0);
+        return;
+    }
+    if (!who->is_abstr) __container_push(&who->vtable,method,sizeof(method));
+    __container_push(&who->vtable_mets_names,method_name,strlen(method_name) + 1);
+    __container_push(&who->vtable_accesses,&level,sizeof(access_level));
+}
+void obj_class_abstract(obj_class_t* targ) {
+    if (!targ) {
+        push_err("[Aurora-obj]: ERROR : Invalid Class!",0);
+        return;
+    }
+    if (targ->is_abstr) {
+        puts("[Aurora-obj]: INFO : Class Alreasy Abstact");
+        return;
+    }
+    if (targ->methods) {
+        __container_free(targ->methods);
+        __container_free(targ->methods_accesses);
+        __container_free(targ->methods_name);
+
+        __container_free(targ->fields_accesses);
+        __container_free(targ->fields_name);
+    }
+    targ->methods = NULL;
+    targ->is_abstr = 1;
+}
+int obj_class_override(obj_class_t * class , const char* met_name,obj_met new_method) {}

@@ -24,14 +24,14 @@
     void obj_class_add_method(obj_class_t * class,obj_met method,const char* method_name,access_level level);
     int obj_class_extend(obj_class_t * who,obj_class_t * from);
     int obj_extend_interface(obj_class_t * who,obj_interface_t * from);
-    void obj_class_virtual(obj_class_t * who,const char* method_name);
+    void obj_class_virtual(obj_class_t * who,obj_met method,const char* method_name,access_level level);
     void obj_class_abstract(obj_class_t* targ);
     int obj_class_override(obj_class_t * class , const char* met_name,obj_met new_method);
     void obj_class_free(obj_class_t** class); 
     /*===== OBJECTECTS API =====*/
 
     obj_t * obj_new(obj_class_t * class,void** constuct_args);
-    void* obj_call(obj_t * o,const char* metName,void** args);
+    void* obj_call(obj_t * o,const char* interface_name,const char* metName,void** args);
     int obj_get_field_val(obj_t * o,const char* field_name,void* bf,size_t size_of_field);
     int obj_set_field_val(obj_t* o,const char* field_name,void* from,size_t size_of_field);
     void obj_free(obj_t** obj);
@@ -54,4 +54,5 @@
     obj_interface_t * obj_interface_new(const char* interf_name);
     int obj_interface_add_method(obj_interface_t * inter,const char* method_name);
     void obj_interface_free(obj_interface_t** inter);
+
 #endif
