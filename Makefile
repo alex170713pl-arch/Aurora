@@ -5,7 +5,7 @@ MODE ?= STATIC
 INCLUDE = include
 PREF = /usr/local
 
-OBJS = one_owner.o rtti.o shared_ptr.o str.o signal.o
+OBJS = one_owner.o rtti.o shared_ptr.o str.o signal.o gc.o
 
 ifeq ($(MODE),SHARED)
     CFLAGS += -fPIC
@@ -34,6 +34,9 @@ shared_ptr.o: $(SRC)shared_ptr.c
 
 str.o: $(SRC)str.c
 	$(CC) $(CFLAGS) -o $@ $<
+gc.o : $(SRC)gc.c
+	$(CC) $(CFLAGS) -o $@ $<
+	
 install: libAurora.so
 	mkdir -p $(PREF)/lib
 	mkdir -p $(PREF)/include/Aurora

@@ -64,27 +64,6 @@ static void __register_sig(signal_t* news) {
     list.len++;
 }
 
-static void __unregister_sig(signal_t* sig) {
-    size_t i;
-    
-    if (!list.signals || !sig) return;
-    
-    if (list.len == 0) {
-        free(list.signals);
-        list.signals = NULL;
-        list.max = 0;
-        return;
-    }
-    
-    for (i = 0; i < list.len; i++) {
-        if (list.signals[i] == sig) {
-            list.signals[i] = list.signals[list.len - 1];
-            list.len--;
-            return;
-        }
-    }
-}
-
 static void __signal_del_handle(struct signal* s, struct handle* h) {
     size_t i;
     
