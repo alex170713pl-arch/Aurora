@@ -1,5 +1,5 @@
 # Aurora : light of ANSI C
- **size** : 27KB (.a) , 31KB (.so) | **ANSI C**
+ **size** : 40KB (.a) , 36KB (.so) | **ANSI C**
 ## modules
 
 - rtti
