@@ -1,5 +1,5 @@
 #ifndef SHARED
-    #define SHARE
+    #define SHARED
     #include <stddef.h>
     typedef struct shared shared_ptr_t;
     typedef struct weak weak_ptr_t;
