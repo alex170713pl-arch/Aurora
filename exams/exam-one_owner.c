@@ -3,7 +3,7 @@
 
 int main() 
 {
-    one_ownerptr * test = one_owner_create(sizeof(int)); // create new pointer with size of int
+    one_ownerptr_t * test = one_owner_create(sizeof(int)); // create new pointer with size of int
     one_owner_set(test,int,897); // set data in pointer
     printf("data of test: %d\n",*(int*)one_owner_get(test));
     

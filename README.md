@@ -1,11 +1,12 @@
 # Aurora : light of ANSI C
- **size** : 27KB (.a) , 31KB (.so) | **ANSI C**
+ **size** : 40KB (.a) , 36KB (.so) | **ANSI C**
 ## modules
 
 - rtti
 - smartptr (one_owner and shared_ptr)
 - str
 - signal
+- gc
 ### API
 - rtti
 ```c
@@ -110,8 +111,6 @@ size_t STRING_GetFree(string_t* Targ);
 size_t STRING_getln(string_t* Targ);
 
 /* ===== MACROS ===== */
-//max possible number (for computer)
-#define STRING_AUTO ((size_t)-1)
 //flags for function STRING_rewriteChar
 #define __STRING_flag_all 1
 #define __STRING_flag_default 0
@@ -162,6 +161,103 @@ size_t STRING_getln(string_t* Targ);
     // print info about signal
     void signal_dump(signal_t* s);
 
+```
+- gc 
+```c
+    /*
+        Aurora-GC: How it works?
+
+        Aurora-GC is built on a 4‑level abstraction model:
+
+        1) GCTables
+        Global array of pointers to GCTable structures.
+        Represents all active GC contexts (arenas).
+
+        2) GCTable
+        Header of a linked list of GCBlock structures.
+        Each table is an independent arena with its own lifetime rules.
+
+        3) GCBlock
+        Fixed-size array of 128 GCObject entries.
+        Blocks are chained together and expand the arena on demand.
+        Provides stable, non-moving storage.
+
+        4) GCObject
+        Lowest-level abstraction.
+        Contains:
+            - void* data          (user memory)
+            - int   lifetime      (TTL counter)
+               - int   pinned        (pin flag)
+            GCObject is the atomic unit of memory management.
+
+        GC Model (TTL-based):
+           Aurora-GC uses a deterministic TTL (Time-To-Life) model.
+           No stop-the-world, no tracing, no root scanning, no moving objects.
+
+           On collection (gc_collect(collections_count)):
+               1) For each non-pinned object:
+                      lifetime -= collections_count
+               2) If lifetime <= 0:
+                      destroy object data
+               3) Set object->data = NULL after destruction
+        ===== ASCII image of built Abstractions =====
+
+                             GCTables
+                     (array of GCTable pointers)
+                     _____________|______________
+                    |              |             |
+                 gtable          tab1       test_table
+                                   |
+                                   v
+                           +----------------+
+                           |    GCTable     |
+                           | (list header)  |
+                           +--------|-------+
+                                    |
+                                    v
+                         block1 --> block2 --> block3 ...
+                           |          |          |
+                           v          v          v
+                     +----------+ +----------+ +----------+
+                     | GCBlock  | | GCBlock  | | GCBlock  |
+                     | (128 obj)| | (128 obj)| | (128 obj)|
+                     +----------+ +----------+ +----------+
+                       |  |  |       |  |  |       |  |  |
+                       o1 o2 o3 ... o128 o129 o130 ... oN
+                       |           |            |
+                     data        data         data
+
+    */
+    // start GC
+    void gc_begin(void);
+    // select object for gc (MUST BE NULL TERMINATED)
+    void gc_select(void* p, ...);
+    // set life time of selected pointer
+    void gc_set_life_time(void* selected, int time)
+    // lock pointer (not bee free by gc_collect(but can free by gc_resetTable and  gc_end))
+    void gc_lock(void* p);
+    // unlock pointer ro free
+    void gc_unlock(void* p) 
+    // start N collections
+    void gc_collect(int collections_count);
+    // create now table (scope) in GC
+    void gc_table(const char* table_name);
+    // set table as current
+    void gc_setTable(const char* table_name);
+    // reset table(free all objects) and set global table(gtable) as current
+    void gc_resetTable(void);
+    // allocate memory in heap and select object in current table
+    void* gc_allocate(size_t size);
+    // unselect pointer in gc
+    void gc_unselect(void* p,...);
+    // export pointer to import table
+    void gc_export(void* p,const char* exportObjName);
+    // import pointer from import table
+    void* gc_import(const char* importObjName);
+    // returns current status of gc
+    GCStatus_t* gc_status(void);
+    // end gc (free all tables)
+    void gc_end(void);
 ```
 #### Examples
     search directory (folder) exams
